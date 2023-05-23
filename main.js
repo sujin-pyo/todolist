@@ -21,6 +21,7 @@ inputEl.onclick = function () {
   renderTodoList();
 };
 
+//리스트 렌더링
 function renderTodoList() {
   var todoListEl = document.getElementById("todo-list");
 
@@ -73,7 +74,8 @@ function createTodoItem(item) {
     //   todolist = todolist.filter(function (item2) {
     //     return item2 !== item;
     //   });
-    //splice : indexOf, splice 두개나 써야함.
+
+    //splice : (bad) indexOf, splice 두개나 써야함. (good) todolist 참조 주소값 유지.
     todolist.splice(todolist.indexOf(item), 1);
     item.done ? renderDoneList() : renderTodoList();
   };
