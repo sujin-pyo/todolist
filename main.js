@@ -3,50 +3,48 @@ var todolist = [];
 renderTodoList();
 renderDoneList();
 
-var inputEl = document.getElementById("todo-input");
+var inputBtnEl = document.getElementById("todo-input");
 var contentsEl = document.getElementById("todo-contents");
+var containerEl = document.getElementById("container");
 
-inputEl.onclick = function () {
-  if (!contentsEl.value) {
-    alert("Please enter todo list contents...");
-    return;
-  }
-  todolist.push({
-    id: crypto.randomUUID(),
-    contents: contentsEl.value,
-    done: false,
-  });
-  contentsEl.value = "";
-  contentsEl.focus();
-  renderTodoList();
-};
+var inputControl = Widget.input("todo-input");
+var containerEl = document.getElementById("container");
+
+var inputBtnControl = Widget.button({
+  label: "입력",
+  onClick: function () {
+    if (!contentsEl.value) {
+      alert("할일을 입력해 주세요");
+      return;
+    }
+
+    Widget.getControl("todo-input");
+
+    todolist.push({
+      id: crypto.randomUUID(),
+      contents: inputControl.getValue(),
+      done: false,
+    });
+    todolistControl.reload(todolist);
+
+    contentsEl.value = "";
+    contentsEl.focus();
+  },
+});
 
 //리스트 렌더링
-function renderTodoList() {
-  var todoListEl = document.getElementById("todo-list");
-
-  todoListEl.innerHTML = "";
-  todolist
-    .filter(function (item) {
-      return !item.done;
-    })
-    .forEach(function (item) {
-      var itemEl = createTodoItem(item);
-      todoListEl.append(itemEl);
-    });
-}
+function renderTodoList() {}
 function renderDoneList() {
-  var doneListEl = document.getElementById("done-list");
-
-  doneListEl.innerHTML = "";
-  todolist
-    .filter(function (item) {
-      return item.done;
-    })
-    .forEach(function (item) {
-      var itemEl = createTodoItem(item);
-      doneListEl.append(itemEl);
-    });
+  // var doneListEl = document.getElementById("done-list");
+  // doneListEl.innerHTML = "";
+  // todolist
+  //   .filter(function (item) {
+  //     return item.done;
+  //   })
+  //   .forEach(function (item) {
+  //     var itemEl = createTodoItem(item);
+  //     doneListEl.append(itemEl);
+  //   });
 }
 
 function createTodoItem(item) {
@@ -56,7 +54,7 @@ function createTodoItem(item) {
   checkbox.type = "checkbox";
   checkbox.checked = item.done;
   checkbox.onchange = function (e) {
-    item.done = !item.done;
+    item.done = e.target.checked;
     //TODO : target, currentTarget 차이, 버블링이 뭔지
     renderTodoList();
     renderDoneList();
