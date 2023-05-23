@@ -1,8 +1,9 @@
 //이 button은 어디서든 쓸 수 있어야함. widget만 번들링할 것임.
-// Widget.button();
 
-function createButton(option) {
+export function createButton(id, option) {
   var el = document.createElement("button");
+  el.id = id;
+
   el.textContent = option.label;
   el.onclick = option.onClick;
 

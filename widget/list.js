@@ -1,6 +1,8 @@
 //전체 컨테이너
-export function createList(option) {
+export function createList(id, option) {
   var el = document.createElement("ul");
+  el.id = id;
+
   el.style.listStyle = "none";
   el.style.padding = "0";
   render(option.datas, option.columns);

@@ -1,86 +1,137 @@
 var todolist = [];
-//var donelist = []; 따로 만들 경우, 자기거를 찾은 다음 제거해야함, .filter 안해도 됨
-renderTodoList();
-renderDoneList();
+render();
 
-var inputBtnEl = document.getElementById("todo-input");
-var contentsEl = document.getElementById("todo-contents");
-var containerEl = document.getElementById("container");
+//var containerEl = document.getElementById("container");
+//var inputControl = Widget.input("todoInput");
 
-var inputControl = Widget.input("todo-input");
-var containerEl = document.getElementById("container");
+//containerEl.append(inputControl.el);
 
-var inputBtnControl = Widget.button({
-  label: "입력",
-  onClick: function () {
-    if (!contentsEl.value) {
-      alert("할일을 입력해 주세요");
-      return;
-    }
+//입력버튼
+// var inputBtnControl = Widget.button({
+//   label: "입력",
+//   onClick: function () {
+//     if (!inputControl.getValue()) {
+//       alert("할일을 입력해 주세요");
+//       return;
+//     }
 
-    Widget.getControl("todo-input");
+//     //Widget.getControl("todo-input");
 
-    todolist.push({
-      id: crypto.randomUUID(),
-      contents: inputControl.getValue(),
-      done: false,
-    });
-    todolistControl.reload(todolist);
+//     todolist.push({
+//       id: crypto.randomUUID(),
+//       contents: inputControl.getValue(),
+//       done: false,
+//     });
+//     checkboxControl.reload(todolist);
+//     contentsControl.reload(todolist);
+//     todolistControl.reload(todolist);
 
-    contentsEl.value = "";
-    contentsEl.focus();
-  },
+//     inputControl.el.value = "";
+//     inputControl.el.focus();
+//   },
+// });
+//containerEl.append(inputBtnControl.el);
+//입력버튼 render
+var inputValue = Widget.getControl("todoInput");
+var onClickSave = function () {
+  if (!inputValue()) {
+    alert("할 일을 입력해 주세요");
+    return;
+  }
+  todolist.push({
+    id: crypto.randomUUID(),
+    contents: input.getValue(),
+    done: false,
+  });
+  checkboxControl.reload(todolist);
+  contentsControl.reload(todolist);
+  todolistControl.reload(todolist);
+
+  //inputValue = "";
+};
+//체크박스
+var checkboxControl = Widget.list({
+  datas: todolist,
+  columns: [
+    {
+      render: function (data) {
+        var checkboxCtrl = Widget.checkbox({
+          checked: data.done,
+          onChange: function () {
+            data.done = !data.done;
+            checkboxControl.reload(todolist);
+          },
+        });
+        return checkboxCtrl.el;
+      },
+    },
+  ],
 });
+containerEl.append(checkboxControl.el);
+//컨텐츠
+var contentsControl = Widget.list({
+  datas: todolist,
+  columns: [
+    {
+      render: function (data) {
+        var contentsCtrl = Widget.contents({
+          textContent: data.contents,
+        });
+        return contentsCtrl.el;
+      },
+    },
+  ],
+});
+containerEl.append(contentsControl.el);
 
-//리스트 렌더링
-function renderTodoList() {}
-function renderDoneList() {
-  // var doneListEl = document.getElementById("done-list");
-  // doneListEl.innerHTML = "";
-  // todolist
-  //   .filter(function (item) {
-  //     return item.done;
-  //   })
-  //   .forEach(function (item) {
-  //     var itemEl = createTodoItem(item);
-  //     doneListEl.append(itemEl);
-  //   });
-}
+//삭제버튼
+var todolistControl = Widget.list({
+  datas: todolist,
+  columns: [
+    {
+      render: function (data) {
+        var delBtnCtrl = Widget.button({
+          label: "삭제",
+          onClick: function () {
+            // splice
+            todolist.splice(todolist.indexOf(data), 1);
+            todolistControl.reload(todolist);
+            contentsControl.reload(todolist);
+            checkboxControl.reload(todolist);
+          },
+        });
+        return delBtnCtrl.el;
+      },
+    },
+  ],
+});
+containerEl.append(todolistControl.el);
 
-function createTodoItem(item) {
-  var liEl = document.createElement("li");
-  //체크박스
-  var checkbox = document.createElement("input");
-  checkbox.type = "checkbox";
-  checkbox.checked = item.done;
-  checkbox.onchange = function (e) {
-    item.done = e.target.checked;
-    //TODO : target, currentTarget 차이, 버블링이 뭔지
-    renderTodoList();
-    renderDoneList();
-  };
+function render() {
+  var root = document.getElementById("contents");
+  var div = Widget.div("container", { parent: root });
 
-  //컨텐츠
-  var contents = document.createElement("span");
-  contents.textContent = item.contents;
-
-  //삭제버튼
-  var delBtn = document.createElement("button");
-  delBtn.textContent = "삭제";
-  delBtn.onclick = function () {
-    //   //filter : 새로운 리스트에 재할당. (bad) todoList 참조 주소값이 바뀜.
-    //   todolist = todolist.filter(function (item2) {
-    //     return item2 !== item;
-    //   });
-
-    //splice : (bad) indexOf, splice 두개나 써야함. (good) todolist 참조 주소값 유지.
-    todolist.splice(todolist.indexOf(item), 1);
-    item.done ? renderDoneList() : renderTodoList();
-  };
-
-  liEl.append(checkbox);
-  liEl.append(contents);
-  liEl.append(delBtn);
-
-  return liEl;
+  // div.append(Widget.input("todoInput", { onKeyDown: onKeyDownTodoInput }));
+  div.append(Widget.input("todoInput"));
+  div.append(Widget.button("btnSave", { label: "입력", onClick: onClickSave }));
+  div.append(
+    Widget.list("todoList", {
+      datas: getSortedTodoList({ done: false }),
+      columns: [
+        { id: "done", render: renderColumnDone },
+        { id: "todo", render: renderColumnTodo },
+        { id: "delete", render: renderColumnDelete },
+      ],
+    })
+  );
+  div.append(
+    Widget.list("todoListDone", {
+      datas: getSortedTodoList({ done: true }),
+      columns: [
+        { id: "done", render: renderColumnDone },
+        { id: "todo", render: renderColumnTodo },
+        { id: "delete", render: renderColumnDelete },
+      ],
+    })
+  );
 }
